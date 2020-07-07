@@ -15,6 +15,14 @@
 		EA7DE22C24AF809E002BF627 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = EA7DE22A24AF809E002BF627 /* LaunchScreen.storyboard */; };
 		EA7DE23D24AF8DD2002BF627 /* trayCm.usdz in Resources */ = {isa = PBXBuildFile; fileRef = EA7DE23C24AF8DD2002BF627 /* trayCm.usdz */; };
 		EA7DE23F24B0C4BC002BF627 /* plate.usdz in Resources */ = {isa = PBXBuildFile; fileRef = EA7DE23E24B0C4BC002BF627 /* plate.usdz */; };
+		EA7DE24124B0D155002BF627 /* toy_robot_vintage.usdz in Resources */ = {isa = PBXBuildFile; fileRef = EA7DE24024B0D155002BF627 /* toy_robot_vintage.usdz */; };
+		EA7DE24324B0D172002BF627 /* fender_stratocaster.usdz in Resources */ = {isa = PBXBuildFile; fileRef = EA7DE24224B0D172002BF627 /* fender_stratocaster.usdz */; };
+		EA7DE24524B0D17C002BF627 /* pot_plant.usdz in Resources */ = {isa = PBXBuildFile; fileRef = EA7DE24424B0D17C002BF627 /* pot_plant.usdz */; };
+		EA7DE24724B0D184002BF627 /* teapot.usdz in Resources */ = {isa = PBXBuildFile; fileRef = EA7DE24624B0D184002BF627 /* teapot.usdz */; };
+		EA7DE24924B0D18D002BF627 /* trowel.usdz in Resources */ = {isa = PBXBuildFile; fileRef = EA7DE24824B0D18C002BF627 /* trowel.usdz */; };
+		EA7DE24B24B0D195002BF627 /* tv_retro.usdz in Resources */ = {isa = PBXBuildFile; fileRef = EA7DE24A24B0D195002BF627 /* tv_retro.usdz */; };
+		EA7DE24D24B0D19C002BF627 /* cup_saucer_set.usdz in Resources */ = {isa = PBXBuildFile; fileRef = EA7DE24C24B0D19C002BF627 /* cup_saucer_set.usdz */; };
+		EA7DE24F24B0D1A5002BF627 /* flower_tulip.usdz in Resources */ = {isa = PBXBuildFile; fileRef = EA7DE24E24B0D1A5002BF627 /* flower_tulip.usdz */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,6 +36,14 @@
 		EA7DE22D24AF809E002BF627 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		EA7DE23C24AF8DD2002BF627 /* trayCm.usdz */ = {isa = PBXFileReference; lastKnownFileType = file.usdz; path = trayCm.usdz; sourceTree = "<group>"; };
 		EA7DE23E24B0C4BC002BF627 /* plate.usdz */ = {isa = PBXFileReference; lastKnownFileType = file.usdz; path = plate.usdz; sourceTree = "<group>"; };
+		EA7DE24024B0D155002BF627 /* toy_robot_vintage.usdz */ = {isa = PBXFileReference; lastKnownFileType = file.usdz; path = toy_robot_vintage.usdz; sourceTree = "<group>"; };
+		EA7DE24224B0D172002BF627 /* fender_stratocaster.usdz */ = {isa = PBXFileReference; lastKnownFileType = file.usdz; path = fender_stratocaster.usdz; sourceTree = "<group>"; };
+		EA7DE24424B0D17C002BF627 /* pot_plant.usdz */ = {isa = PBXFileReference; lastKnownFileType = file.usdz; path = pot_plant.usdz; sourceTree = "<group>"; };
+		EA7DE24624B0D184002BF627 /* teapot.usdz */ = {isa = PBXFileReference; lastKnownFileType = file.usdz; path = teapot.usdz; sourceTree = "<group>"; };
+		EA7DE24824B0D18C002BF627 /* trowel.usdz */ = {isa = PBXFileReference; lastKnownFileType = file.usdz; path = trowel.usdz; sourceTree = "<group>"; };
+		EA7DE24A24B0D195002BF627 /* tv_retro.usdz */ = {isa = PBXFileReference; lastKnownFileType = file.usdz; path = tv_retro.usdz; sourceTree = "<group>"; };
+		EA7DE24C24B0D19C002BF627 /* cup_saucer_set.usdz */ = {isa = PBXFileReference; lastKnownFileType = file.usdz; path = cup_saucer_set.usdz; sourceTree = "<group>"; };
+		EA7DE24E24B0D1A5002BF627 /* flower_tulip.usdz */ = {isa = PBXFileReference; lastKnownFileType = file.usdz; path = flower_tulip.usdz; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -75,7 +91,15 @@
 		EA7DE23324AF80B9002BF627 /* ARAssets */ = {
 			isa = PBXGroup;
 			children = (
+				EA7DE24024B0D155002BF627 /* toy_robot_vintage.usdz */,
+				EA7DE24224B0D172002BF627 /* fender_stratocaster.usdz */,
+				EA7DE24A24B0D195002BF627 /* tv_retro.usdz */,
+				EA7DE24C24B0D19C002BF627 /* cup_saucer_set.usdz */,
+				EA7DE24424B0D17C002BF627 /* pot_plant.usdz */,
+				EA7DE24E24B0D1A5002BF627 /* flower_tulip.usdz */,
 				EA7DE23C24AF8DD2002BF627 /* trayCm.usdz */,
+				EA7DE24824B0D18C002BF627 /* trowel.usdz */,
+				EA7DE24624B0D184002BF627 /* teapot.usdz */,
 				EA7DE23E24B0C4BC002BF627 /* plate.usdz */,
 			);
 			path = ARAssets;
@@ -139,10 +163,18 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				EA7DE24724B0D184002BF627 /* teapot.usdz in Resources */,
 				EA7DE22C24AF809E002BF627 /* LaunchScreen.storyboard in Resources */,
+				EA7DE24324B0D172002BF627 /* fender_stratocaster.usdz in Resources */,
 				EA7DE23F24B0C4BC002BF627 /* plate.usdz in Resources */,
+				EA7DE24B24B0D195002BF627 /* tv_retro.usdz in Resources */,
+				EA7DE24524B0D17C002BF627 /* pot_plant.usdz in Resources */,
+				EA7DE24124B0D155002BF627 /* toy_robot_vintage.usdz in Resources */,
 				EA7DE22924AF809E002BF627 /* Assets.xcassets in Resources */,
+				EA7DE24D24B0D19C002BF627 /* cup_saucer_set.usdz in Resources */,
 				EA7DE22724AF809E002BF627 /* Main.storyboard in Resources */,
+				EA7DE24F24B0D1A5002BF627 /* flower_tulip.usdz in Resources */,
+				EA7DE24924B0D18D002BF627 /* trowel.usdz in Resources */,
 				EA7DE23D24AF8DD2002BF627 /* trayCm.usdz in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
