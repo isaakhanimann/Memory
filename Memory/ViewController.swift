@@ -12,6 +12,8 @@ import Combine
 import MultipeerConnectivity
 import ARKit
 
+let cardThickness: Float = 0.005
+
 class ViewController: UIViewController {
     
     @IBOutlet var arView: ARView!
@@ -19,7 +21,6 @@ class ViewController: UIViewController {
     var gameAnchor: AnchorEntity!
     var cards = [Entity]()
     let numberOfCards = 16
-    let cardThickness: Float = 0.005
     
     var peerID: MCPeerID!
     var mcSession: MCSession!
@@ -127,11 +128,20 @@ class ViewController: UIViewController {
         } else {
             // Get the entity at the location we've tapped, if one exists
             if let cardEntity = arView.entity(at: tapLocation) as? CardEntity {
-                if cardEntity.card.revealed {
-                    cardEntity.hide()
-                } else {
-                    cardEntity.reveal()
+                
+                cardEntity.requestOwnership { result in
+                    if result == .granted {
+                        if cardEntity.card.revealed {
+                            cardEntity.hide()
+                        } else {
+                            cardEntity.reveal()
+                        }
+                    } else {
+                        print("the user doesn't have ownership of this card. Choose a different card")
+                    }
                 }
+                
+                
             }
         }
     }
@@ -216,6 +226,17 @@ class CardEntity: Entity, HasModel, HasCollision {
     
     func reveal() {
         card.revealed = true
+         
+        // Don’t automatically accept ownership requests because the other user can't just hide this card again.
+        synchronization?.ownershipTransferMode = .manual
+        
+        let selection = SelectionEntity()
+        selection.position.y = cardThickness + 0.001
+        
+        // Remove synchronization component so the client doesn't see the SelectionEntity
+        selection.synchronization = nil
+         // Add as child
+         addChild(selection)
         
         // transform is a value type so this copies it
         var cardTransform = self.transform
@@ -225,6 +246,14 @@ class CardEntity: Entity, HasModel, HasCollision {
     
     func hide() {
         card.revealed = false
+        synchronization?.ownershipTransferMode = .autoAccept
+
+        // Iterate children looking for Selection Entity
+        for child in children where child is SelectionEntity {
+            // Remove child and exit loop
+            child.removeFromParent()
+            break
+        }
         
         // transform is a value type so this copies it
         var cardTransform = self.transform
@@ -242,4 +271,14 @@ struct CardComponent: Component, Codable {
 enum Role {
     case host
     case client
+}
+
+class SelectionEntity: Entity, HasModel {
+    
+    required init() {
+        super.init()
+        let selectionMesh = MeshResource.generatePlane(width: 0.05, depth: 0.05)
+        let selectionMaterial = SimpleMaterial(color: .blue, isMetallic: false)
+        model = ModelComponent(mesh: selectionMesh, materials: [selectionMaterial])
+    }
 }
