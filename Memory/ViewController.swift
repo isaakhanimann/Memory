@@ -56,8 +56,13 @@ class ViewController: UIViewController {
         
         if role == .host {
             // Host Creates MCNearbyServiceAdvertiser and Starts Advertising
+            mcAdvertiserAssistant = MCAdvertiserAssistant(serviceType: "hws-kb", discoveryInfo: nil, session: mcSession)
+            mcAdvertiserAssistant.start()
         } else {
             // Client Creates MCNearbyServiceBrowser and Starts Browsing
+            let mcBrowser = MCBrowserViewController(serviceType: "hws-kb", session: mcSession)
+            mcBrowser.delegate = self
+            present(mcBrowser, animated: true)
         }
         
         // Use Multipeer session to Synchronize RealityKit scene
