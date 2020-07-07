@@ -9,6 +9,8 @@
 import UIKit
 import RealityKit
 import Combine
+import MultipeerConnectivity
+import ARKit
 
 class ViewController: UIViewController {
     
@@ -18,22 +20,60 @@ class ViewController: UIViewController {
     var cards = [Entity]()
     let numberOfCards = 16
     let cardThickness: Float = 0.005
+    
+    var peerID: MCPeerID!
+    var mcSession: MCSession!
+    var mcAdvertiserAssistant: MCAdvertiserAssistant!
+    var role: Role!
 
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        gameAnchor = AnchorEntity(plane: .horizontal, minimumBounds: [0.2, 0.2])
+        //setupMCConnectivity()
+        setupARConfiguration()
         
-        arView.scene.anchors.append(gameAnchor)
-        
-        
-        addCardsWithModels()
-        addOcclusionBox()
+        addGameBoard()
         
         let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(handleTap(recognizer:)))
         arView.addGestureRecognizer(tapGestureRecognizer)
         
+    }
+    
+    func setupARConfiguration() {
+        arView.automaticallyConfigureSession = false
+        let config = ARWorldTrackingConfiguration()
+        config.planeDetection = [.horizontal]
+        config.isCollaborationEnabled = true
+        config.environmentTexturing = .automatic
+        arView.session.run(config)
+    }
+    
+    func setupMCConnectivity() {
+        peerID = MCPeerID(displayName: UIDevice.current.name)
+        mcSession = MCSession(peer: peerID, securityIdentity: nil, encryptionPreference: .required)
+        print("my peerID is: \(String(describing: peerID))")
+        
+        role = peerID.displayName == "Isaaaaaaaaaaaaaaaaaaaaaaaaaaaak‘s iPhone" ? .host : .client
+        
+        if role == .host {
+            // Host Creates MCNearbyServiceAdvertiser and Starts Advertising
+        } else {
+            // Client Creates MCNearbyServiceBrowser and Starts Browsing
+        }
+        
+        // Use Multipeer session to Synchronize RealityKit scene
+        arView.scene.synchronizationService = try? MultipeerConnectivityService(session: mcSession)
+        
+        
+    }
+    
+    func addGameBoard() {
+        gameAnchor = AnchorEntity(plane: .horizontal, minimumBounds: [0.2, 0.2])
+        arView.scene.anchors.append(gameAnchor)
+        
+        addCardsWithModels()
+        addOcclusionBox()
     }
     
     
@@ -99,6 +139,50 @@ class ViewController: UIViewController {
 
 }
 
+extension ViewController: MCSessionDelegate, MCBrowserViewControllerDelegate {
+    
+    func session(_ session: MCSession, peer peerID: MCPeerID, didChange state: MCSessionState) {
+        switch state {
+        case MCSessionState.connected:
+            print("Connected: \(peerID.displayName)")
+
+        case MCSessionState.connecting:
+            print("Connecting: \(peerID.displayName)")
+
+        case MCSessionState.notConnected:
+            print("Not Connected: \(peerID.displayName)")
+        default:
+            print("Unknown case of state")
+        }
+    }
+    
+    func session(_ session: MCSession, didReceive data: Data, fromPeer peerID: MCPeerID) {
+        
+    }
+    
+    func session(_ session: MCSession, didReceive stream: InputStream, withName streamName: String, fromPeer peerID: MCPeerID) {
+        
+    }
+    
+    func session(_ session: MCSession, didStartReceivingResourceWithName resourceName: String, fromPeer peerID: MCPeerID, with progress: Progress) {
+        
+    }
+    
+    func session(_ session: MCSession, didFinishReceivingResourceWithName resourceName: String, fromPeer peerID: MCPeerID, at localURL: URL?, withError error: Error?) {
+        
+    }
+    
+    func browserViewControllerDidFinish(_ browserViewController: MCBrowserViewController) {
+        dismiss(animated: true)
+    }
+    
+    func browserViewControllerWasCancelled(_ browserViewController: MCBrowserViewController) {
+        dismiss(animated: true)
+    }
+    
+    
+}
+
 
 // Declare custom entity with the Model, Collision and Card Component
 class CardEntity: Entity, HasModel, HasCollision {
@@ -132,4 +216,9 @@ class CardEntity: Entity, HasModel, HasCollision {
 struct CardComponent: Component, Codable {
     var revealed = false
     var kind = ""
+}
+
+enum Role {
+    case host
+    case client
 }
