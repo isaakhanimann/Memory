@@ -30,11 +30,9 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        //setupMCConnectivity()
+        setupMCConnectivity()
         setupARConfiguration()
-        
-        addGameBoard()
-        
+                
         let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(handleTap(recognizer:)))
         arView.addGestureRecognizer(tapGestureRecognizer)
         
@@ -118,14 +116,32 @@ class ViewController: UIViewController {
     
     @objc func handleTap(recognizer: UITapGestureRecognizer) {
         let tapLocation = recognizer.location(in: arView)
-        // Get the entity at the location we've tapped, if one exists
-        if let cardEntity = arView.entity(at: tapLocation) as? CardEntity {
-            if cardEntity.card.revealed {
-                cardEntity.hide()
-            } else {
-                cardEntity.reveal()
+        
+        if gameAnchor == nil && role == .host {
+            placeGameBoard(on: tapLocation)
+        } else {
+            // Get the entity at the location we've tapped, if one exists
+            if let cardEntity = arView.entity(at: tapLocation) as? CardEntity {
+                if cardEntity.card.revealed {
+                    cardEntity.hide()
+                } else {
+                    cardEntity.reveal()
+                }
             }
         }
+    }
+    
+    func placeGameBoard(on screenLocation: CGPoint) {
+        // Find position under cursor
+        guard let result = arView.raycast(from: screenLocation, allowing: .existingPlaneGeometry, alignment: .horizontal).first else { return }
+        // Create ARKit ARAnchor and add to ARSession
+        let arAnchor = ARAnchor(name: "Memory Game Board", transform: result.worldTransform)
+        arView.session.add(anchor: arAnchor)
+        
+        // Create a RealityKit AnchorEntity and add to the scene
+        gameAnchor = AnchorEntity(anchor: arAnchor)
+        arView.scene.addAnchor(gameAnchor)
+        addGameBoard()
     }
     
     func addOcclusionBox() {
