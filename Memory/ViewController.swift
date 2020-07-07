@@ -17,6 +17,7 @@ class ViewController: UIViewController {
     var gameAnchor: AnchorEntity!
     var cards = [Entity]()
     let numberOfCards = 16
+    let cardThickness: Float = 0.005
 
     
     override func viewDidLoad() {
@@ -27,6 +28,7 @@ class ViewController: UIViewController {
         arView.scene.anchors.append(gameAnchor)
         
         addCardsWithModels()
+        addOcclusionBox()
         
         let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(handleTap(recognizer:)))
         arView.addGestureRecognizer(tapGestureRecognizer)
@@ -39,6 +41,8 @@ class ViewController: UIViewController {
         let cardTemplate = try! Entity.loadModel(named: "plate")
         // Generate collision shapes for the card so we can interact with it
         cardTemplate.generateCollisionShapes(recursive: true)
+        cardTemplate.transform.rotation = simd_quatf(angle: .pi, axis: [1,0,0])
+
 
         let models = [try! Entity.loadModel(named: "toy_robot_vintage"),try! Entity.loadModel(named: "fender_stratocaster"),try! Entity.loadModel(named: "tv_retro"),try! Entity.loadModel(named: "cup_saucer_set"),try! Entity.loadModel(named: "pot_plant"),try! Entity.loadModel(named: "flower_tulip"),try! Entity.loadModel(named: "trowel"),try! Entity.loadModel(named: "teapot")]
         
@@ -48,7 +52,8 @@ class ViewController: UIViewController {
             let firstIndex = index / 2
             let secondIndex = index % 2
             let modelOnCard = models[firstIndex].clone(recursive: true)
-            modelOnCard.position = [0,0.01,0]
+            // +0.001 so the model hovers just a little bit over the card so the occlusionBox occludes it
+            modelOnCard.position = [0,cardThickness/2+0.001,0]
             card.addChild(modelOnCard)
             // Give the card a name so we'll know what we're interacting with
             card.name = "card\(firstIndex)\(secondIndex)"
@@ -85,4 +90,14 @@ class ViewController: UIViewController {
         }
         
     }
+    
+    func addOcclusionBox() {
+        let boxSize: Float = 0.5
+        let boxMesh = MeshResource.generateBox(size: boxSize)
+        let boxMaterial = OcclusionMaterial()
+        let occlusionBox = ModelEntity(mesh: boxMesh, materials: [boxMaterial])
+        occlusionBox.position.y = -boxSize/2 - cardThickness/2
+        gameAnchor.addChild(occlusionBox)
+    }
+
 }
