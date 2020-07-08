@@ -13,27 +13,30 @@ import MultipeerConnectivity
 import ARKit
 
 let cardThickness: Float = 0.005
+let animationDuration = 0.2
 
 class ViewController: UIViewController {
     
     @IBOutlet var arView: ARView!
     
     var gameAnchor: AnchorEntity!
-    var cards = [Entity]()
+    var cards = [CardEntity]()
     let numberOfCards = 16
+    var selection1: CardEntity?
+    var selection2: CardEntity?
     
     var peerID: MCPeerID!
     var mcSession: MCSession!
     var mcAdvertiserAssistant: MCAdvertiserAssistant!
     var role: Role!
-
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         setupMCConnectivity()
         setupARConfiguration()
-                
+        
         let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(handleTap(recognizer:)))
         arView.addGestureRecognizer(tapGestureRecognizer)
         
@@ -84,7 +87,7 @@ class ViewController: UIViewController {
     func addCardsWithModels() {
         
         let cardModelEntity = try! Entity.loadModel(named: "plate")
-
+        
         let cardEntityTemplate = CardEntity()
         cardEntityTemplate.model = cardModelEntity.model
         cardEntityTemplate.collision = cardModelEntity.collision
@@ -92,8 +95,14 @@ class ViewController: UIViewController {
         // Generate collision shapes for the card so we can interact with it
         cardEntityTemplate.generateCollisionShapes(recursive: true)
         cardEntityTemplate.transform.rotation = simd_quatf(angle: .pi, axis: [1,0,0])
-            
-        let models = [try! Entity.loadModel(named: "toy_robot_vintage"),try! Entity.loadModel(named: "fender_stratocaster"),try! Entity.loadModel(named: "tv_retro"),try! Entity.loadModel(named: "cup_saucer_set"),try! Entity.loadModel(named: "pot_plant"),try! Entity.loadModel(named: "flower_tulip"),try! Entity.loadModel(named: "trowel"),try! Entity.loadModel(named: "teapot")]
+        
+        let names = ["toy_robot_vintage", "fender_stratocaster", "tv_retro", "cup_saucer_set", "pot_plant", "flower_tulip", "trowel", "teapot"]
+        
+        var models = [ModelEntity]()
+        for name in names {
+            let newModel = try! Entity.loadModel(named: name)
+            models.append(newModel)
+        }
         
         for index in 0..<self.numberOfCards {
             let card = cardEntityTemplate.clone(recursive: true)
@@ -102,12 +111,12 @@ class ViewController: UIViewController {
             // +0.001 so the model hovers just a little bit over the card so the occlusionBox occludes it
             modelOnCard.position = [0,cardThickness/2+0.001,0]
             card.addChild(modelOnCard)
-            card.components[CardComponent.self]?.kind = modelOnCard.name
+            card.components[CardComponent.self]?.kind = names[modelIndex]
             self.cards.append(card)
         }
-
+        
         self.cards.shuffle()
-
+        
         for (index, card) in self.cards.enumerated() {
             let x = Float(index % 4) - 1.5
             let z = Float(index / 4) - 1.5
@@ -121,6 +130,9 @@ class ViewController: UIViewController {
     
     
     @objc func handleTap(recognizer: UITapGestureRecognizer) {
+        for card in cards {
+            print(card.card.kind)
+        }
         let tapLocation = recognizer.location(in: arView)
         
         if gameAnchor == nil && role == .host {
@@ -129,12 +141,28 @@ class ViewController: UIViewController {
             // Get the entity at the location we've tapped, if one exists
             if let cardEntity = arView.entity(at: tapLocation) as? CardEntity {
                 
-                cardEntity.requestOwnership { result in
+                cardEntity.requestOwnership { [self] result in
                     if result == .granted {
                         if cardEntity.card.revealed {
+                            if self.selection1 == cardEntity {
+                                // even though SelectionEntity is a reference type the item in the array won't be set to nil because the items in the array can't be nil because they are non optional
+                                self.selection1 = nil
+                            } else if self.selection2 == cardEntity {
+                                self.selection2 = nil
+                            }
                             cardEntity.hide()
                         } else {
-                            cardEntity.reveal()
+                            if self.selection1 == nil {
+                                cardEntity.reveal()
+                                self.selection1 = cardEntity
+                            } else if self.selection2 == nil {
+                                cardEntity.reveal()
+                                self.selection2 = cardEntity
+                            } else {
+                                print("The user already has two cards selected and can therefore not reveal another card")
+                                return
+                            }
+                            DispatchQueue.main.asyncAfter(deadline: .now() + animationDuration + 0.2, execute: self.checkSelection)
                         }
                     } else {
                         print("the user doesn't have ownership of this card. Choose a different card")
@@ -143,6 +171,27 @@ class ViewController: UIViewController {
                 
                 
             }
+        }
+    }
+    
+    func checkSelection() {
+        if selection1?.card.kind == self.selection2?.card.kind {
+            // remove the two cards and their children
+            for child in selection1!.children where child is SelectionEntity {
+                // Remove child and exit loop
+                child.removeFromParent()
+                break
+            }
+            selection1?.removeFromParent()
+            selection1 = nil
+            
+            for child in self.selection2!.children where child is SelectionEntity {
+                // Remove child and exit loop
+                child.removeFromParent()
+                break
+            }
+            self.selection2?.removeFromParent()
+            self.selection2 = nil
         }
     }
     
@@ -167,7 +216,7 @@ class ViewController: UIViewController {
         occlusionBox.position.y = -boxSize/2 - cardThickness/2
         gameAnchor.addChild(occlusionBox)
     }
-
+    
 }
 
 extension ViewController: MCSessionDelegate, MCBrowserViewControllerDelegate {
@@ -176,10 +225,10 @@ extension ViewController: MCSessionDelegate, MCBrowserViewControllerDelegate {
         switch state {
         case MCSessionState.connected:
             print("Connected: \(peerID.displayName)")
-
+            
         case MCSessionState.connecting:
             print("Connecting: \(peerID.displayName)")
-
+            
         case MCSessionState.notConnected:
             print("Not Connected: \(peerID.displayName)")
         default:
@@ -226,7 +275,7 @@ class CardEntity: Entity, HasModel, HasCollision {
     
     func reveal() {
         card.revealed = true
-         
+        
         // Don’t automatically accept ownership requests because the other user can't just hide this card again.
         synchronization?.ownershipTransferMode = .manual
         
@@ -235,19 +284,19 @@ class CardEntity: Entity, HasModel, HasCollision {
         
         // Remove synchronization component so the client doesn't see the SelectionEntity
         selection.synchronization = nil
-         // Add as child
-         addChild(selection)
+        // Add as child
+        addChild(selection)
         
         // transform is a value type so this copies it
         var cardTransform = self.transform
         cardTransform.rotation = simd_quatf(angle: 0, axis: [1, 0, 0])
-        move(to: cardTransform, relativeTo: parent, duration: 0.3, timingFunction: .easeInOut)
+        move(to: cardTransform, relativeTo: parent, duration: animationDuration, timingFunction: .easeInOut)
     }
     
     func hide() {
         card.revealed = false
         synchronization?.ownershipTransferMode = .autoAccept
-
+        
         // Iterate children looking for Selection Entity
         for child in children where child is SelectionEntity {
             // Remove child and exit loop
@@ -258,7 +307,7 @@ class CardEntity: Entity, HasModel, HasCollision {
         // transform is a value type so this copies it
         var cardTransform = self.transform
         cardTransform.rotation = simd_quatf(angle: .pi, axis: [1, 0, 0])
-        move(to: cardTransform, relativeTo: parent, duration: 0.3, timingFunction: .easeInOut)
+        move(to: cardTransform, relativeTo: parent, duration: animationDuration, timingFunction: .easeInOut)
     }
 }
 
