@@ -19,11 +19,13 @@ class ViewController: UIViewController {
     
     @IBOutlet var arView: ARView!
     
-    var gameAnchor: AnchorEntity!
+    var gameAnchor: Experience.PreviewBoard!
     var cards = [CardEntity]()
     let numberOfCards = 16
     var selection1: CardEntity?
     var selection2: CardEntity?
+    var raycast: ARTrackedRaycast?
+    var gameIsPlaced = false
     
     var peerID: MCPeerID!
     var mcSession: MCSession!
@@ -36,6 +38,9 @@ class ViewController: UIViewController {
         
         setupMCConnectivity()
         setupARConfiguration()
+        
+        loadGameBoard()
+        startTracing()
         
         let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(handleTap(recognizer:)))
         arView.addGestureRecognizer(tapGestureRecognizer)
@@ -71,16 +76,36 @@ class ViewController: UIViewController {
         
         // Use Multipeer session to Synchronize RealityKit scene
         arView.scene.synchronizationService = try? MultipeerConnectivityService(session: mcSession)
-        
-        
     }
     
-    func addGameBoard() {
-        gameAnchor = AnchorEntity(plane: .horizontal, minimumBounds: [0.2, 0.2])
-        arView.scene.anchors.append(gameAnchor)
-        
-        addCardsWithModels()
-        addOcclusionBox()
+    func loadGameBoard() {
+        print("loadGameBoard executed")
+        gameAnchor = try! Experience.loadPreviewBoard()
+        arView.scene.addAnchor(gameAnchor)
+    }
+    
+    func startTracing() {
+        print("startTracing called")
+        raycast = arView.trackedRaycast(from: view.center, allowing: .estimatedPlane, alignment: .horizontal) { results in
+            print("raycast is updating")
+            // Refine the game position with raycast update
+            if let result = results.first {
+                self.gameAnchor.setTransformMatrix(result.worldTransform, relativeTo: nil)
+            }
+        }
+    }
+    
+    func stopTracing() {
+        print("raycast has stopped")
+        raycast?.stopTracking()
+    }
+    
+    func addGameBoardOooooooooooooooold() {
+//        gameAnchor = AnchorEntity(plane: .horizontal, minimumBounds: [0.2, 0.2])
+//        arView.scene.anchors.append(gameAnchor)
+//
+//        addCardsWithModels()
+//        addOcclusionBox()
     }
     
     
@@ -135,8 +160,9 @@ class ViewController: UIViewController {
         }
         let tapLocation = recognizer.location(in: arView)
         
-        if gameAnchor == nil && role == .host {
-            placeGameBoard(on: tapLocation)
+        if !gameIsPlaced && role == .host {
+            gameIsPlaced = true
+            stopTracing()
         } else {
             // Get the entity at the location we've tapped, if one exists
             if let cardEntity = arView.entity(at: tapLocation) as? CardEntity {
@@ -195,17 +221,17 @@ class ViewController: UIViewController {
         }
     }
     
-    func placeGameBoard(on screenLocation: CGPoint) {
+    func placeGameBoardOooooooold(on screenLocation: CGPoint) {
         // Find position under cursor
-        guard let result = arView.raycast(from: screenLocation, allowing: .existingPlaneGeometry, alignment: .horizontal).first else { return }
-        // Create ARKit ARAnchor and add to ARSession
-        let arAnchor = ARAnchor(name: "Memory Game Board", transform: result.worldTransform)
-        arView.session.add(anchor: arAnchor)
-        
-        // Create a RealityKit AnchorEntity and add to the scene
-        gameAnchor = AnchorEntity(anchor: arAnchor)
-        arView.scene.addAnchor(gameAnchor)
-        addGameBoard()
+//        guard let result = arView.raycast(from: screenLocation, allowing: .existingPlaneGeometry, alignment: .horizontal).first else { return }
+//        // Create ARKit ARAnchor and add to ARSession
+//        let arAnchor = ARAnchor(name: "Memory Game Board", transform: result.worldTransform)
+//        arView.session.add(anchor: arAnchor)
+//
+//        // Create a RealityKit AnchorEntity and add to the scene
+//        gameAnchor = AnchorEntity(anchor: arAnchor)
+//        arView.scene.addAnchor(gameAnchor)
+//        addGameBoard()
     }
     
     func addOcclusionBox() {
