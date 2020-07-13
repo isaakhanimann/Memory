@@ -3,10 +3,11 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXBuildFile section */
+		EA55B7F624B6353500C5560B /* FocusEntity in Frameworks */ = {isa = PBXBuildFile; productRef = EA55B7F524B6353500C5560B /* FocusEntity */; };
 		EA7DE22024AF809E002BF627 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA7DE21F24AF809E002BF627 /* AppDelegate.swift */; };
 		EA7DE22224AF809E002BF627 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA7DE22124AF809E002BF627 /* ViewController.swift */; };
 		EA7DE22424AF809E002BF627 /* Experience.rcproject in Sources */ = {isa = PBXBuildFile; fileRef = EA7DE22324AF809E002BF627 /* Experience.rcproject */; };
@@ -51,6 +52,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				EA55B7F624B6353500C5560B /* FocusEntity in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -121,6 +123,9 @@
 			dependencies = (
 			);
 			name = Memory;
+			packageProductDependencies = (
+				EA55B7F524B6353500C5560B /* FocusEntity */,
+			);
 			productName = Memory;
 			productReference = EA7DE21C24AF809E002BF627 /* Memory.app */;
 			productType = "com.apple.product-type.application";
@@ -149,6 +154,9 @@
 				Base,
 			);
 			mainGroup = EA7DE21324AF809E002BF627;
+			packageReferences = (
+				EA55B7F424B6353500C5560B /* XCRemoteSwiftPackageReference "FocusEntity" */,
+			);
 			productRefGroup = EA7DE21D24AF809E002BF627 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -386,6 +394,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		EA55B7F424B6353500C5560B /* XCRemoteSwiftPackageReference "FocusEntity" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/maxxfrazer/FocusEntity.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		EA55B7F524B6353500C5560B /* FocusEntity */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EA55B7F424B6353500C5560B /* XCRemoteSwiftPackageReference "FocusEntity" */;
+			productName = FocusEntity;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = EA7DE21424AF809E002BF627 /* Project object */;
 }
