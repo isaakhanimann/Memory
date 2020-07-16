@@ -15,21 +15,43 @@ class ViewController: UIViewController {
     
     @IBOutlet var arView: ARView!
     let timerLabel = UILabel()
+    let restartButton = UIButton()
+
     var timer: Timer?
     var secondsUntilTimeout = 15
     
     var placementHandler = PlacementHandler()
-    var gameBoard: Entity?
+    var gameBoard: Entity!
     
     var selection1: CardEntity?
     var selection2: CardEntity?
     
-    var hasGameStarted = false {
+    enum GameState {
+        case notStarted
+        case started
+        case won
+        case lost
+    }
+    
+    var gameState = GameState.notStarted {
         didSet {
-            if !oldValue {
+            if oldValue == .notStarted || oldValue == .won || oldValue == .lost {
                 //start timer and update label
                 timer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(updateLabel), userInfo: nil, repeats: true)
                 timerLabel.isHidden = false
+            }
+        }
+        willSet {
+            if newValue == .lost {
+                DispatchQueue.main.async {
+                    self.timerLabel.text = "You lost"
+                    self.restartButton.isHidden = false
+                }
+            } else if newValue == .won {
+                DispatchQueue.main.async {
+                    self.timerLabel.text = "You won"
+                    self.restartButton.isHidden = false
+                }
             }
         }
     }
@@ -39,6 +61,7 @@ class ViewController: UIViewController {
         
         setUpARView()
         setupTimerLabel()
+        setupRestartButtonButton()
         
         placementHandler.handlePlacing(on: arView) { [self] entity in
             self.gameBoard = entity
@@ -80,7 +103,27 @@ class ViewController: UIViewController {
         timerLabel.centerXAnchor.constraint(equalTo: arView.centerXAnchor).isActive = true
     }
     
+    func setupRestartButtonButton() {
+        restartButton.backgroundColor = .white
+        restartButton.setTitleColor(.black, for: .normal)
+        restartButton.setTitle("Restart", for: .normal)
+        restartButton.layer.cornerRadius = 15
+        restartButton.isHidden = true
+        
+        restartButton.addTarget(self, action: #selector(restartGame), for: .touchUpInside)
+        
+        arView.addSubview(restartButton)
+        //the constraints have to be set after the subview is added to the view
+        setRestartButtonConstraints()
+    }
     
+    func setRestartButtonConstraints() {
+        restartButton.translatesAutoresizingMaskIntoConstraints = false
+        restartButton.bottomAnchor.constraint(equalTo: arView.bottomAnchor, constant: -80).isActive = true
+        restartButton.heightAnchor.constraint(equalToConstant: 50).isActive = true
+        restartButton.widthAnchor.constraint(equalToConstant: 180).isActive = true
+        restartButton.centerXAnchor.constraint(equalTo: arView.centerXAnchor).isActive = true
+    }
     
     @objc func handleTap(recognizer: UITapGestureRecognizer) {
         
@@ -98,9 +141,8 @@ class ViewController: UIViewController {
                 }
                 cardEntity.hide()
             } else {
-                if !hasGameStarted {
-                    hasGameStarted = true
-                }
+                gameState = .started
+                
                 if self.selection1 == nil {
                     cardEntity.reveal()
                     self.selection1 = cardEntity
@@ -118,12 +160,38 @@ class ViewController: UIViewController {
         }
     }
     
+    @objc func restartGame() {
+        secondsUntilTimeout = 15
+        for child in gameBoard.children {
+            if let cardEntity = child as? CardEntity {
+                if !cardEntity.isEnabled {
+                    cardEntity.isEnabled = true
+                }
+            }
+        }
+        DispatchQueue.main.async {
+            self.restartButton.isHidden = true
+        }
+    }
+    
     func checkSelection() {
         if selection1?.card.kind == self.selection2?.card.kind {
-            selection1?.removeFromParent()
+            selection1?.isEnabled = false
             selection1 = nil
-            self.selection2?.removeFromParent()
-            self.selection2 = nil
+            selection2?.isEnabled = false
+            selection2 = nil
+            let numberOfEnabledCards = gameBoard.children.filter({entity in
+                if let cardEntity = entity as? CardEntity {
+                    if cardEntity.isEnabled {
+                        return true
+                    }
+                }
+                return false
+            }).count
+            
+            if numberOfEnabledCards == 0 {
+                gameState = .won
+            }
         }
     }
     
@@ -135,17 +203,8 @@ class ViewController: UIViewController {
             }
         } else {
             timer?.invalidate()
-            gameIsOver()
+            gameState = .lost
         }
-    }
-    
-    func gameIsOver() {
-        //check if there are still cards on the scene or not
-        DispatchQueue.main.async {
-            self.timerLabel.text = "You lost"
-        }
-        secondsUntilTimeout = 15
-        hasGameStarted = false
     }
     
 }
