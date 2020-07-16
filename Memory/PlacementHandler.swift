@@ -16,7 +16,7 @@ class PlacementHandler {
     
     let placementButton = UIButton()
     var coachingOverlay: ARCoachingOverlayView!
-    var previewScene: Entity!
+    var previewBoard: Entity!
     var realScene: Entity!
     var raycastAnchor: AnchorEntity?
     var updateCancellable: Cancellable?
@@ -24,6 +24,8 @@ class PlacementHandler {
     var trackingStarted = false
     var arView: ARView!
     var completionHandler: ((Entity) -> Void)!
+    let numberOfCards = 16
+
     
     func handlePlacing(on arView: ARView, completion: @escaping (Entity) -> Void) {
         self.arView = arView
@@ -31,21 +33,8 @@ class PlacementHandler {
         self.completionHandler = completion
         setupCoachingOverlay()
         
-        
-        loadPreviewBoard()
-        loadRealBoard()
-    }
-    
-    func loadPreviewBoard() {
-        let mesh = MeshResource.generateBox(size: 0.2)
-        let material = SimpleMaterial(color: .red, isMetallic: true)
-        previewScene = ModelEntity(mesh: mesh, materials: [material])
-    }
-    
-    func loadRealBoard() {
-        let mesh = MeshResource.generateBox(size: 0.2)
-        let material = SimpleMaterial(color: .blue, isMetallic: true)
-        realScene = ModelEntity(mesh: mesh, materials: [material])
+        previewBoard = getPreviewEntity()
+        realScene = getRealEntity()
     }
     
     func setupPlacementButton() {
@@ -141,14 +130,14 @@ class PlacementHandler {
     
     func addPreviewScene(onto raycastResult: ARRaycastResult) {
         raycastAnchor = AnchorEntity(world: raycastResult.worldTransform)
-        raycastAnchor?.addChild(previewScene)
+        raycastAnchor?.addChild(previewBoard)
         arView.scene.addAnchor(raycastAnchor!)
     }
     
     func movePreviewScene(to raycastResult: ARRaycastResult) {
         let transform = Transform(matrix: raycastResult.worldTransform)
-        previewScene.setPosition(transform.translation, relativeTo: nil)
-        previewScene.setOrientation(transform.rotation, relativeTo: nil)
+        previewBoard.setPosition(transform.translation, relativeTo: nil)
+        previewBoard.setOrientation(transform.rotation, relativeTo: nil)
     }
     
     func addRealScene(onto raycastResult: ARRaycastResult) {
@@ -167,75 +156,108 @@ class PlacementHandler {
         placementButton.isHidden = false
     }
     
-    
-    //    func loadGameBoard() {
-    //        print("loadGameBoard executed")
-    //        gameAnchor = try! Experience.loadPreviewBoard()
-    //        arView.scene.addAnchor(gameAnchor)
-    //    }
+    var previewCards = [CardEntity]()
+
+    func getPreviewEntity() -> Entity {
         
-    //    func addGameBoardOooooooooooooooold() {
-    //        gameAnchor = AnchorEntity(plane: .horizontal, minimumBounds: [0.2, 0.2])
-    //        arView.scene.anchors.append(gameAnchor)
-    //
-    //        addCardsWithModels()
-    //        addOcclusionBox()
-    //    }
-    //
-    //
-    //    func addCardsWithModels() {
-    //
-    //        let cardModelEntity = try! Entity.loadModel(named: "plate")
-    //
-    //        let cardEntityTemplate = CardEntity()
-    //        cardEntityTemplate.model = cardModelEntity.model
-    //        cardEntityTemplate.collision = cardModelEntity.collision
-    //        cardEntityTemplate.card = CardComponent()
-    //        // Generate collision shapes for the card so we can interact with it
-    //        cardEntityTemplate.generateCollisionShapes(recursive: true)
-    //        cardEntityTemplate.transform.rotation = simd_quatf(angle: .pi, axis: [1,0,0])
-    //
-    //        let names = ["toy_robot_vintage", "fender_stratocaster", "tv_retro", "cup_saucer_set", "pot_plant", "flower_tulip", "trowel", "teapot"]
-    //
-    //        var models = [ModelEntity]()
-    //        for name in names {
-    //            let newModel = try! Entity.loadModel(named: name)
-    //            models.append(newModel)
-    //        }
-    //
-    //        for index in 0..<self.numberOfCards {
-    //            let card = cardEntityTemplate.clone(recursive: true)
-    //            let modelIndex = index / 2
-    //            let modelOnCard = models[modelIndex].clone(recursive: true)
-    //            // +0.001 so the model hovers just a little bit over the card so the occlusionBox occludes it
-    //            modelOnCard.position = [0,cardThickness/2+0.001,0]
-    //            card.addChild(modelOnCard)
-    //            card.components[CardComponent.self]?.kind = names[modelIndex]
-    //            self.cards.append(card)
-    //        }
-    //
-    //        self.cards.shuffle()
-    //
-    //        for (index, card) in self.cards.enumerated() {
-    //            let x = Float(index % 4) - 1.5
-    //            let z = Float(index / 4) - 1.5
-    //            // Set the position of the card
-    //            card.position = [x * 0.1, 0, z * 0.1]
-    //            // Add the card to the anchor
-    //            self.gameAnchor.addChild(card)
-    //        }
-    //    }
-    //
-    //
-//
-//    func addOcclusionBox() {
-//        let boxSize: Float = 0.5
-//        let boxMesh = MeshResource.generateBox(size: boxSize)
-//        let boxMaterial = OcclusionMaterial()
-//        let occlusionBox = ModelEntity(mesh: boxMesh, materials: [boxMaterial])
-//        occlusionBox.position.y = -boxSize/2 - cardThickness/2
-//        gameScene.addChild(occlusionBox)
-//    }
+        let parentEntity = Entity()
+        
+        let cardTemplate = getCardTemplateWithOutCollisionShape()
+        
+        //create list of card entities
+        for _ in 0..<numberOfCards {
+            let card = cardTemplate.clone(recursive: true)
+            previewCards.append(card)
+        }
+        
+        //place cards relative to parent
+        for (index, card) in previewCards.enumerated() {
+            let x = Float(index % 4) - 1.5
+            let z = Float(index / 4) - 1.5
+            // Set the position of the card
+            card.position = [x * 0.1, 0, z * 0.1]
+            // Add the card to the anchor
+            parentEntity.addChild(card)
+        }
+        
+        return parentEntity
+    }
+    
+    var realCards = [CardEntity]()
+
+    func getRealEntity() -> Entity {
+        
+        let parentEntity = Entity()
+        
+        //load models
+        let names = ["toy_robot_vintage", "fender_stratocaster", "tv_retro", "cup_saucer_set", "pot_plant", "flower_tulip", "trowel", "teapot"]
+        var models = [ModelEntity]()
+        for name in names {
+            let newModel = try! Entity.loadModel(named: name)
+            models.append(newModel)
+        }
+        
+        let cardTemplate = getCardTemplateWithCollisionShape()
+        
+        //put models on top of cards
+        for index in 0..<numberOfCards {
+            let card = cardTemplate.clone(recursive: true)
+            let modelIndex = index / 2
+            let modelOnCard = models[modelIndex].clone(recursive: true)
+            // +0.001 so the model hovers just a little bit over the card so the occlusionBox occludes it
+            modelOnCard.position = [0,cardThickness/2+0.001,0]
+            card.addChild(modelOnCard)
+            card.components[CardComponent.self]?.kind = names[modelIndex]
+            realCards.append(card)
+        }
+        
+        realCards.shuffle()
+        
+        //place cards relative to game anchor
+        for (index, card) in realCards.enumerated() {
+            let x = Float(index % 4) - 1.5
+            let z = Float(index / 4) - 1.5
+            // Set the position of the card
+            card.position = [x * 0.1, 0, z * 0.1]
+            // Add the card to the anchor
+            parentEntity.addChild(card)
+        }
+        
+        
+        //add occlusion box
+        let boxSize: Float = 0.5
+        let boxMesh = MeshResource.generateBox(size: boxSize)
+        let boxMaterial = OcclusionMaterial()
+        let occlusionBox = ModelEntity(mesh: boxMesh, materials: [boxMaterial])
+        occlusionBox.position.y = -boxSize/2 - cardThickness/2
+        parentEntity.addChild(occlusionBox)
+        
+        return parentEntity
+    }
+    
+    func getCardTemplateWithCollisionShape() -> CardEntity {
+        //create card entity
+        let cardModelEntity = try! Entity.loadModel(named: "plate")
+        let cardEntityTemplate = CardEntity()
+        cardEntityTemplate.model = cardModelEntity.model
+        cardEntityTemplate.collision = cardModelEntity.collision
+        cardEntityTemplate.card = CardComponent()
+        // Generate collision shapes for the card so we can interact with it
+        cardEntityTemplate.generateCollisionShapes(recursive: true)
+        cardEntityTemplate.transform.rotation = simd_quatf(angle: .pi, axis: [1,0,0])
+        return cardEntityTemplate
+    }
+    
+    func getCardTemplateWithOutCollisionShape() -> CardEntity {
+        //create card entity
+        let cardModelEntity = try! Entity.loadModel(named: "plate")
+        let cardEntityTemplate = CardEntity()
+        cardEntityTemplate.model = cardModelEntity.model
+        cardEntityTemplate.collision = cardModelEntity.collision
+        cardEntityTemplate.card = CardComponent()
+        cardEntityTemplate.transform.rotation = simd_quatf(angle: .pi, axis: [1,0,0])
+        return cardEntityTemplate
+    }
 }
 
 extension Experience {

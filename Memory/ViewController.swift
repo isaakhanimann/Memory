@@ -20,8 +20,6 @@ class ViewController: UIViewController {
     var placementHandler = PlacementHandler()
     var placedEntity: Entity?
     
-    var cards = [CardEntity]()
-    let numberOfCards = 16
     var selection1: CardEntity?
     var selection2: CardEntity?
     
@@ -33,6 +31,7 @@ class ViewController: UIViewController {
         
         placementHandler.handlePlacing(on: arView) { entity in
             self.placedEntity = entity
+            //todo get all the children entities and assign them to the card array.
         }
                 
         let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(handleTap(recognizer:)))
