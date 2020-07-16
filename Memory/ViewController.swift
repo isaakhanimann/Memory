@@ -14,24 +14,36 @@ import ARKit
 class ViewController: UIViewController {
     
     @IBOutlet var arView: ARView!
+    let timerLabel = UILabel()
+    var timer: Timer?
+    var secondsUntilTimeout = 15
     
     var placementHandler = PlacementHandler()
     var gameBoard: Entity?
     
     var selection1: CardEntity?
     var selection2: CardEntity?
-
     
+    var hasGameStarted = false {
+        didSet {
+            if !oldValue {
+                //start timer and update label
+                timer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(updateLabel), userInfo: nil, repeats: true)
+                timerLabel.isHidden = false
+            }
+        }
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         setUpARView()
+        setupTimerLabel()
         
         placementHandler.handlePlacing(on: arView) { [self] entity in
             self.gameBoard = entity
         }
-                
+        
         let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(handleTap(recognizer:)))
         arView.addGestureRecognizer(tapGestureRecognizer)
         
@@ -46,45 +58,64 @@ class ViewController: UIViewController {
         arView.session.run(config)
     }
     
-
+    func setupTimerLabel() {
+        timerLabel.backgroundColor = UIColor(white: 0.8, alpha: 0.5)
+        timerLabel.text = "15s"
+        timerLabel.textColor = .white
+        timerLabel.layer.cornerRadius = 15
+        timerLabel.layer.masksToBounds = true
+        timerLabel.textAlignment = .center
+        timerLabel.isHidden = true
+        
+        arView.addSubview(timerLabel)
+        //the constraints have to be set after the subview is added to the view
+        setTimerLabelConstraints()
+    }
+    
+    func setTimerLabelConstraints() {
+        timerLabel.translatesAutoresizingMaskIntoConstraints = false
+        timerLabel.topAnchor.constraint(equalTo: arView.topAnchor, constant: 50).isActive = true
+        timerLabel.heightAnchor.constraint(equalToConstant: 50).isActive = true
+        timerLabel.widthAnchor.constraint(equalToConstant: 100).isActive = true
+        timerLabel.centerXAnchor.constraint(equalTo: arView.centerXAnchor).isActive = true
+    }
+    
+    
     
     @objc func handleTap(recognizer: UITapGestureRecognizer) {
         
         let tapLocation = recognizer.location(in: arView)
         
-            // Get the entity at the location we've tapped, if one exists
-            if let cardEntity = arView.entity(at: tapLocation) as? CardEntity {
-                
-                cardEntity.requestOwnership { [self] result in
-                    if result == .granted {
-                        if cardEntity.card.revealed {
-                            if self.selection1 == cardEntity {
-                                // even though SelectionEntity is a reference type the item in the array won't be set to nil because the items in the array can't be nil because they are non optional
-                                self.selection1 = nil
-                            } else if self.selection2 == cardEntity {
-                                self.selection2 = nil
-                            }
-                            cardEntity.hide()
-                        } else {
-                            if self.selection1 == nil {
-                                cardEntity.reveal()
-                                self.selection1 = cardEntity
-                            } else if self.selection2 == nil {
-                                cardEntity.reveal()
-                                self.selection2 = cardEntity
-                            } else {
-                                print("The user already has two cards selected and can therefore not reveal another card")
-                                return
-                            }
-                            DispatchQueue.main.asyncAfter(deadline: .now() + Constants.animationDuration + 0.2, execute: self.checkSelection)
-                        }
-                    } else {
-                        print("the user doesn't have ownership of this card. Choose a different card")
-                    }
+        // Get the entity at the location we've tapped, if one exists
+        if let cardEntity = arView.entity(at: tapLocation) as? CardEntity {
+            
+            if cardEntity.card.revealed {
+                if self.selection1 == cardEntity {
+                    // even though SelectionEntity is a reference type the item in the array won't be set to nil because the items in the array can't be nil because they are non optional
+                    self.selection1 = nil
+                } else if self.selection2 == cardEntity {
+                    self.selection2 = nil
                 }
-                
-                
+                cardEntity.hide()
+            } else {
+                if !hasGameStarted {
+                    hasGameStarted = true
+                }
+                if self.selection1 == nil {
+                    cardEntity.reveal()
+                    self.selection1 = cardEntity
+                } else if self.selection2 == nil {
+                    cardEntity.reveal()
+                    self.selection2 = cardEntity
+                } else {
+                    print("The user already has two cards selected and can therefore not reveal another card")
+                    return
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + Constants.animationDuration + 0.2, execute: self.checkSelection)
             }
+            
+            
+        }
     }
     
     func checkSelection() {
@@ -94,6 +125,27 @@ class ViewController: UIViewController {
             self.selection2?.removeFromParent()
             self.selection2 = nil
         }
+    }
+    
+    @objc func updateLabel() {
+        if secondsUntilTimeout > 0 {
+            secondsUntilTimeout -= 1
+            DispatchQueue.main.async {
+                self.timerLabel.text = String(self.secondsUntilTimeout) + "s"
+            }
+        } else {
+            timer?.invalidate()
+            gameIsOver()
+        }
+    }
+    
+    func gameIsOver() {
+        //check if there are still cards on the scene or not
+        DispatchQueue.main.async {
+            self.timerLabel.text = "You lost"
+        }
+        secondsUntilTimeout = 15
+        hasGameStarted = false
     }
     
 }
