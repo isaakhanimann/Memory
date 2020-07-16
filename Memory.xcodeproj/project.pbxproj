@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		EA55B7FC24C0860900C5560B /* PlacementHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA55B7FB24C0860900C5560B /* PlacementHandler.swift */; };
+		EA55B7FE24C0A51F00C5560B /* CardEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA55B7FD24C0A51F00C5560B /* CardEntity.swift */; };
 		EA7DE22024AF809E002BF627 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA7DE21F24AF809E002BF627 /* AppDelegate.swift */; };
 		EA7DE22224AF809E002BF627 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA7DE22124AF809E002BF627 /* ViewController.swift */; };
 		EA7DE22424AF809E002BF627 /* Experience.rcproject in Sources */ = {isa = PBXBuildFile; fileRef = EA7DE22324AF809E002BF627 /* Experience.rcproject */; };
@@ -28,6 +29,7 @@
 
 /* Begin PBXFileReference section */
 		EA55B7FB24C0860900C5560B /* PlacementHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlacementHandler.swift; sourceTree = "<group>"; };
+		EA55B7FD24C0A51F00C5560B /* CardEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardEntity.swift; sourceTree = "<group>"; };
 		EA7DE21C24AF809E002BF627 /* Memory.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Memory.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EA7DE21F24AF809E002BF627 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		EA7DE22124AF809E002BF627 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -87,6 +89,7 @@
 				EA7DE22A24AF809E002BF627 /* LaunchScreen.storyboard */,
 				EA7DE22D24AF809E002BF627 /* Info.plist */,
 				EA55B7FB24C0860900C5560B /* PlacementHandler.swift */,
+				EA55B7FD24C0A51F00C5560B /* CardEntity.swift */,
 			);
 			path = Memory;
 			sourceTree = "<group>";
@@ -197,6 +200,7 @@
 				EA7DE22224AF809E002BF627 /* ViewController.swift in Sources */,
 				EA7DE22024AF809E002BF627 /* AppDelegate.swift in Sources */,
 				EA7DE22424AF809E002BF627 /* Experience.rcproject in Sources */,
+				EA55B7FE24C0A51F00C5560B /* CardEntity.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

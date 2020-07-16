@@ -259,30 +259,3 @@ class PlacementHandler {
         return cardEntityTemplate
     }
 }
-
-extension Experience {
-    
-    private static var streams = [Combine.AnyCancellable]()
-    
-    public static func loadUnanchoredSceneAsync(with sceneName: String, completion: @escaping (Result<Entity, Error>) -> Void) {
-        guard let realityFileURL = Bundle.main.url(forResource: "Experience", withExtension: "reality") else {
-            completion(.failure(Experience.LoadRealityFileError.fileNotFound("Experience.reality")))
-            return
-        }
-        
-        var cancellable: Combine.AnyCancellable?
-        let realitySceneURL = realityFileURL.appendingPathComponent(sceneName, isDirectory: false)
-        let loadRequest = Entity.loadAsync(contentsOf: realitySceneURL)
-        cancellable = loadRequest.sink(receiveCompletion: { loadCompletion in
-            if case let .failure(error) = loadCompletion {
-                print("this is the failure")
-                completion(.failure(error))
-            }
-            streams.removeAll { $0 === cancellable }
-        }, receiveValue: { entity in
-            completion(.success(entity))
-        })
-        cancellable?.store(in: &streams)
-    }
-}
-
