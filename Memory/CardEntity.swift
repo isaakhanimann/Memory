@@ -23,7 +23,7 @@ class CardEntity: Entity, HasModel, HasCollision {
         // transform is a value type so this copies it
         var cardTransform = self.transform
         cardTransform.rotation = simd_quatf(angle: 0, axis: [1, 0, 0])
-        move(to: cardTransform, relativeTo: parent, duration: animationDuration, timingFunction: .easeInOut)
+        move(to: cardTransform, relativeTo: parent, duration: Constants.animationDuration, timingFunction: .easeInOut)
     }
     
     func hide() {
@@ -32,7 +32,7 @@ class CardEntity: Entity, HasModel, HasCollision {
         // transform is a value type so this copies it
         var cardTransform = self.transform
         cardTransform.rotation = simd_quatf(angle: .pi, axis: [1, 0, 0])
-        move(to: cardTransform, relativeTo: parent, duration: animationDuration, timingFunction: .easeInOut)
+        move(to: cardTransform, relativeTo: parent, duration: Constants.animationDuration, timingFunction: .easeInOut)
     }
 }
 

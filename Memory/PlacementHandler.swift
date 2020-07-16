@@ -26,6 +26,7 @@ class PlacementHandler {
     var completionHandler: ((Entity) -> Void)!
     let numberOfCards = 16
 
+
     
     func handlePlacing(on arView: ARView, completion: @escaping (Entity) -> Void) {
         self.arView = arView
@@ -162,7 +163,7 @@ class PlacementHandler {
         
         let parentEntity = Entity()
         
-        let cardTemplate = getCardTemplateWithOutCollisionShape()
+        let cardTemplate = getCardTemplate()
         
         //create list of card entities
         for _ in 0..<numberOfCards {
@@ -197,7 +198,7 @@ class PlacementHandler {
             models.append(newModel)
         }
         
-        let cardTemplate = getCardTemplateWithCollisionShape()
+        let cardTemplate = getCardTemplate(includeCollisionShape: true)
         
         //put models on top of cards
         for index in 0..<numberOfCards {
@@ -205,7 +206,7 @@ class PlacementHandler {
             let modelIndex = index / 2
             let modelOnCard = models[modelIndex].clone(recursive: true)
             // +0.001 so the model hovers just a little bit over the card so the occlusionBox occludes it
-            modelOnCard.position = [0,cardThickness/2+0.001,0]
+            modelOnCard.position = [0,Constants.cardThickness/2+0.001,0]
             card.addChild(modelOnCard)
             card.components[CardComponent.self]?.kind = names[modelIndex]
             realCards.append(card)
@@ -223,39 +224,29 @@ class PlacementHandler {
             parentEntity.addChild(card)
         }
         
-        
         //add occlusion box
         let boxSize: Float = 0.5
         let boxMesh = MeshResource.generateBox(size: boxSize)
         let boxMaterial = OcclusionMaterial()
         let occlusionBox = ModelEntity(mesh: boxMesh, materials: [boxMaterial])
-        occlusionBox.position.y = -boxSize/2 - cardThickness/2
+        occlusionBox.position.y = -boxSize/2 - Constants.cardThickness/2
         parentEntity.addChild(occlusionBox)
         
         return parentEntity
     }
     
-    func getCardTemplateWithCollisionShape() -> CardEntity {
+    func getCardTemplate(includeCollisionShape: Bool = false) -> CardEntity {
         //create card entity
-        let cardModelEntity = try! Entity.loadModel(named: "plate")
+        let mesh = MeshResource.generateBox(width: 0.06, height: Constants.cardThickness, depth: 0.06, cornerRadius: 20)
+        let material = SimpleMaterial(color: .white, roughness: 0.5, isMetallic: false)
         let cardEntityTemplate = CardEntity()
-        cardEntityTemplate.model = cardModelEntity.model
-        cardEntityTemplate.collision = cardModelEntity.collision
-        cardEntityTemplate.card = CardComponent()
-        // Generate collision shapes for the card so we can interact with it
-        cardEntityTemplate.generateCollisionShapes(recursive: true)
-        cardEntityTemplate.transform.rotation = simd_quatf(angle: .pi, axis: [1,0,0])
-        return cardEntityTemplate
-    }
-    
-    func getCardTemplateWithOutCollisionShape() -> CardEntity {
-        //create card entity
-        let cardModelEntity = try! Entity.loadModel(named: "plate")
-        let cardEntityTemplate = CardEntity()
-        cardEntityTemplate.model = cardModelEntity.model
-        cardEntityTemplate.collision = cardModelEntity.collision
+        cardEntityTemplate.model = ModelComponent(mesh: mesh, materials: [material])
         cardEntityTemplate.card = CardComponent()
         cardEntityTemplate.transform.rotation = simd_quatf(angle: .pi, axis: [1,0,0])
+        if includeCollisionShape {
+            // Generate collision shapes for the card so we can interact with it
+            cardEntityTemplate.generateCollisionShapes(recursive: true)
+        }
         return cardEntityTemplate
     }
 }

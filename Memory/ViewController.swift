@@ -10,8 +10,6 @@ import UIKit
 import RealityKit
 import ARKit
 
-let cardThickness: Float = 0.005
-let animationDuration = 0.2
 
 class ViewController: UIViewController {
     
@@ -22,6 +20,7 @@ class ViewController: UIViewController {
     
     var selection1: CardEntity?
     var selection2: CardEntity?
+
     
     
     override func viewDidLoad() {
@@ -77,7 +76,7 @@ class ViewController: UIViewController {
                                 print("The user already has two cards selected and can therefore not reveal another card")
                                 return
                             }
-                            DispatchQueue.main.asyncAfter(deadline: .now() + animationDuration + 0.2, execute: self.checkSelection)
+                            DispatchQueue.main.asyncAfter(deadline: .now() + Constants.animationDuration + 0.2, execute: self.checkSelection)
                         }
                     } else {
                         print("the user doesn't have ownership of this card. Choose a different card")
