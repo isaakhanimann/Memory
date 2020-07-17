@@ -10,6 +10,7 @@
 		EA55B7FC24C0860900C5560B /* PlacementHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA55B7FB24C0860900C5560B /* PlacementHandler.swift */; };
 		EA55B7FE24C0A51F00C5560B /* CardEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA55B7FD24C0A51F00C5560B /* CardEntity.swift */; };
 		EA55B80024C0AFB700C5560B /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA55B7FF24C0AFB700C5560B /* Constants.swift */; };
+		EA55B80224C1A0D600C5560B /* GameBrain.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA55B80124C1A0D600C5560B /* GameBrain.swift */; };
 		EA7DE22024AF809E002BF627 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA7DE21F24AF809E002BF627 /* AppDelegate.swift */; };
 		EA7DE22224AF809E002BF627 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA7DE22124AF809E002BF627 /* ViewController.swift */; };
 		EA7DE22724AF809E002BF627 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = EA7DE22524AF809E002BF627 /* Main.storyboard */; };
@@ -29,6 +30,7 @@
 		EA55B7FB24C0860900C5560B /* PlacementHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlacementHandler.swift; sourceTree = "<group>"; };
 		EA55B7FD24C0A51F00C5560B /* CardEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardEntity.swift; sourceTree = "<group>"; };
 		EA55B7FF24C0AFB700C5560B /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
+		EA55B80124C1A0D600C5560B /* GameBrain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameBrain.swift; sourceTree = "<group>"; };
 		EA7DE21C24AF809E002BF627 /* Memory.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Memory.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EA7DE21F24AF809E002BF627 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		EA7DE22124AF809E002BF627 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -86,6 +88,7 @@
 				EA55B7FB24C0860900C5560B /* PlacementHandler.swift */,
 				EA55B7FD24C0A51F00C5560B /* CardEntity.swift */,
 				EA55B7FF24C0AFB700C5560B /* Constants.swift */,
+				EA55B80124C1A0D600C5560B /* GameBrain.swift */,
 			);
 			path = Memory;
 			sourceTree = "<group>";
@@ -192,6 +195,7 @@
 				EA7DE22224AF809E002BF627 /* ViewController.swift in Sources */,
 				EA7DE22024AF809E002BF627 /* AppDelegate.swift in Sources */,
 				EA55B7FE24C0A51F00C5560B /* CardEntity.swift in Sources */,
+				EA55B80224C1A0D600C5560B /* GameBrain.swift in Sources */,
 				EA55B80024C0AFB700C5560B /* Constants.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
