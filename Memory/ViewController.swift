@@ -16,6 +16,8 @@ class ViewController: UIViewController {
     @IBOutlet var arView: ARView!
     let timerLabel = UILabel()
     let restartButton = UIButton()
+    var tapGestureRecognizer: UITapGestureRecognizer! = UITapGestureRecognizer(target: self, action: #selector(handleTap(recognizer:)))
+
 
     var timer: Timer?
     var secondsUntilTimeout = 15
@@ -46,11 +48,13 @@ class ViewController: UIViewController {
                 DispatchQueue.main.async {
                     self.timerLabel.text = "You lost"
                     self.restartButton.isHidden = false
+                    self.arView.removeGestureRecognizer(self.tapGestureRecognizer)
                 }
             } else if newValue == .won {
                 DispatchQueue.main.async {
                     self.timerLabel.text = "You won"
                     self.restartButton.isHidden = false
+                    self.arView.removeGestureRecognizer(self.tapGestureRecognizer)
                 }
             }
         }
@@ -67,7 +71,7 @@ class ViewController: UIViewController {
             self.gameBoard = entity
         }
         
-        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(handleTap(recognizer:)))
+        tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(handleTap(recognizer:)))
         arView.addGestureRecognizer(tapGestureRecognizer)
         
     }
@@ -162,15 +166,41 @@ class ViewController: UIViewController {
     
     @objc func restartGame() {
         secondsUntilTimeout = 15
-        for child in gameBoard.children {
-            if let cardEntity = child as? CardEntity {
-                if !cardEntity.isEnabled {
-                    cardEntity.isEnabled = true
-                }
+        selection1 = nil
+        selection2 = nil
+        arView.addGestureRecognizer(tapGestureRecognizer)
+
+        
+        var cards: [CardEntity] = gameBoard.children.map({entity in
+            if let cardEntity = entity as? CardEntity {
+                return cardEntity
+            } else {
+                return nil
+            }
+        }).compactMap { $0 }
+                
+        for card in cards {
+            if card.card.revealed {
+                card.isEnabled = true
+                card.hide()
             }
         }
+        
+        //Todo - cards need to be shuffled / repositioned
+        cards.shuffle()
+        
+        for (index, card) in cards.enumerated() {
+            let x = Float(index % 4) - 1.5
+            let z = Float(index / 4) - 1.5
+            // Set the position of the card
+            let transform = Transform(rotation: simd_quatf(angle: .pi, axis: [1, 0, 0]), translation: [x * 0.1, 0, z * 0.1])
+            card.move(to: transform, relativeTo: gameBoard, duration: 2)
+        }
+        
         DispatchQueue.main.async {
             self.restartButton.isHidden = true
+            self.timerLabel.text = String(self.secondsUntilTimeout) + "s"
+            self.timerLabel.isHidden = true
         }
     }
     
