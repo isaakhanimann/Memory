@@ -157,7 +157,7 @@ class ViewController: UIViewController {
                     print("The user already has two cards selected and can therefore not reveal another card")
                     return
                 }
-                DispatchQueue.main.asyncAfter(deadline: .now() + Constants.animationDuration + 0.2, execute: self.checkSelection)
+                DispatchQueue.main.asyncAfter(deadline: .now() + Constants.flipDuration + 0.2, execute: self.checkSelection)
             }
             
             
@@ -194,7 +194,9 @@ class ViewController: UIViewController {
             let z = Float(index / 4) - 1.5
             // Set the position of the card
             let transform = Transform(rotation: simd_quatf(angle: .pi, axis: [1, 0, 0]), translation: [x * 0.1, 0, z * 0.1])
-            card.move(to: transform, relativeTo: gameBoard, duration: 2)
+            DispatchQueue.main.asyncAfter(deadline: .now() + Constants.flipDuration) {
+                card.move(to: transform, relativeTo: self.gameBoard, duration: Constants.shuffleDuration)
+            }
         }
         
         DispatchQueue.main.async {

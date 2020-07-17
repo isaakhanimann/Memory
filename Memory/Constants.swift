@@ -9,6 +9,7 @@
 import Foundation
 
 enum Constants {
-    static let animationDuration = 0.2
+    static let flipDuration = 0.2
+    static let shuffleDuration = 1.0
     static let cardThickness: Float = 0.005
 }
