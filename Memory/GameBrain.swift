@@ -42,6 +42,7 @@ class GameBrain {
         willSet {
             if newValue == .lost {
                 DispatchQueue.main.async {
+                    self.timer?.invalidate()
                     self.timerLabel.isHidden = true
                     self.lostLabel.isHidden = false
                     self.restartButton.isHidden = false
@@ -49,6 +50,7 @@ class GameBrain {
                 }
             } else if newValue == .won {
                 DispatchQueue.main.async {
+                    self.timer?.invalidate()
                     self.timerLabel.isHidden = true
                     self.wonLabel.isHidden = false
                     self.restartButton.isHidden = false
@@ -72,7 +74,7 @@ class GameBrain {
     func setupTimerLabel() {
         timerLabel.backgroundColor = UIColor(white: 0.8, alpha: 0.5)
         timerLabel.text = String(Constants.timoutDuration) + "s"
-        timerLabel.textColor = .white
+        timerLabel.textColor = .black
         timerLabel.layer.cornerRadius = 15
         timerLabel.layer.masksToBounds = true
         timerLabel.textAlignment = .center
@@ -85,16 +87,16 @@ class GameBrain {
     
     func setTimerLabelConstraints() {
         timerLabel.translatesAutoresizingMaskIntoConstraints = false
-        timerLabel.topAnchor.constraint(equalTo: arView.topAnchor, constant: 50).isActive = true
+        timerLabel.topAnchor.constraint(equalTo: arView.superview!.safeAreaLayoutGuide.topAnchor, constant: 10).isActive = true
         timerLabel.heightAnchor.constraint(equalToConstant: 50).isActive = true
         timerLabel.widthAnchor.constraint(equalToConstant: 100).isActive = true
         timerLabel.centerXAnchor.constraint(equalTo: arView.centerXAnchor).isActive = true
     }
     
     func setupWonLabel() {
-        wonLabel.backgroundColor = UIColor(red: 0, green: 1, blue: 0, alpha: 0.2)
-        wonLabel.text = "You Won"
-        wonLabel.font = wonLabel.font.withSize(35)
+        wonLabel.backgroundColor = UIColor(red: 173/255.0, green: 228/255.0, blue: 152/255.0, alpha: 0.3)
+        wonLabel.text = "You Won!"
+        wonLabel.font = wonLabel.font.withSize(45)
         wonLabel.textColor = .white
         wonLabel.textAlignment = .center
         wonLabel.isHidden = true
@@ -113,9 +115,9 @@ class GameBrain {
     }
     
     func setupLostLabel() {
-        lostLabel.backgroundColor = UIColor(red: 1, green: 0, blue: 0, alpha: 0.2)
-        lostLabel.text = "You Lost"
-        lostLabel.font = lostLabel.font.withSize(35)
+        lostLabel.backgroundColor = UIColor(red: 1, green: 95/255.0, blue: 64/255.0, alpha: 0.3)
+        lostLabel.text = "You Lost!"
+        lostLabel.font = lostLabel.font.withSize(45)
         lostLabel.textColor = .white
         lostLabel.textAlignment = .center
         lostLabel.isHidden = true
