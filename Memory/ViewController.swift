@@ -15,14 +15,9 @@ class ViewController: UIViewController {
     
     @IBOutlet var arView: ARView!
     
-    
     var placementHandler = PlacementHandler()
     var gameBrain = GameBrain()
     var gameBoard: Entity!
-    
-    
-    
-    
     
     override func viewDidLoad() {
         super.viewDidLoad()

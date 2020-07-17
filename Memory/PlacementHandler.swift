@@ -191,7 +191,7 @@ class PlacementHandler {
         let parentEntity = Entity()
         
         //load models
-        let names = ["toy_robot_vintage", "fender_stratocaster", "tv_retro", "cup_saucer_set", "pot_plant", "flower_tulip", "trowel", "teapot"]
+        let names = ["toy_robot_vintage", "fender_stratocaster", "toy_car", "cup_saucer_set", "pot_plant", "flower_tulip", "trowel", "teapot"]
         var models = [ModelEntity]()
         for name in names {
             let newModel = try! Entity.loadModel(named: name)
