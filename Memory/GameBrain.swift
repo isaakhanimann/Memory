@@ -15,10 +15,12 @@ class GameBrain {
     var arView: ARView!
     var gameBoard: Entity!
     let timerLabel = UILabel()
+    let wonLabel = UILabel()
+    let lostLabel = UILabel()
     let restartButton = UIButton()
     var tapGestureRecognizer: UITapGestureRecognizer!
     var timer: Timer?
-    var secondsUntilTimeout = 15
+    var secondsUntilTimeout = Constants.timoutDuration
     var selection1: CardEntity?
     var selection2: CardEntity?
     
@@ -40,13 +42,15 @@ class GameBrain {
         willSet {
             if newValue == .lost {
                 DispatchQueue.main.async {
-                    self.timerLabel.text = "You lost"
+                    self.timerLabel.isHidden = true
+                    self.lostLabel.isHidden = false
                     self.restartButton.isHidden = false
                     self.arView.removeGestureRecognizer(self.tapGestureRecognizer)
                 }
             } else if newValue == .won {
                 DispatchQueue.main.async {
-                    self.timerLabel.text = "You won"
+                    self.timerLabel.isHidden = true
+                    self.wonLabel.isHidden = false
                     self.restartButton.isHidden = false
                     self.arView.removeGestureRecognizer(self.tapGestureRecognizer)
                 }
@@ -58,6 +62,8 @@ class GameBrain {
         self.arView = arView
         self.gameBoard = gameBoard
         setupTimerLabel()
+        setupWonLabel()
+        setupLostLabel()
         setupRestartButtonButton()
         tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(handleTap(recognizer:)))
         arView.addGestureRecognizer(tapGestureRecognizer)
@@ -65,7 +71,7 @@ class GameBrain {
     
     func setupTimerLabel() {
         timerLabel.backgroundColor = UIColor(white: 0.8, alpha: 0.5)
-        timerLabel.text = "15s"
+        timerLabel.text = String(Constants.timoutDuration) + "s"
         timerLabel.textColor = .white
         timerLabel.layer.cornerRadius = 15
         timerLabel.layer.masksToBounds = true
@@ -83,6 +89,48 @@ class GameBrain {
         timerLabel.heightAnchor.constraint(equalToConstant: 50).isActive = true
         timerLabel.widthAnchor.constraint(equalToConstant: 100).isActive = true
         timerLabel.centerXAnchor.constraint(equalTo: arView.centerXAnchor).isActive = true
+    }
+    
+    func setupWonLabel() {
+        wonLabel.backgroundColor = UIColor(red: 0, green: 1, blue: 0, alpha: 0.2)
+        wonLabel.text = "You Won"
+        wonLabel.font = wonLabel.font.withSize(35)
+        wonLabel.textColor = .white
+        wonLabel.textAlignment = .center
+        wonLabel.isHidden = true
+        
+        arView.addSubview(wonLabel)
+        //the constraints have to be set after the subview is added to the view
+        setWonLabelConstraints()
+    }
+    
+    func setWonLabelConstraints() {
+        wonLabel.translatesAutoresizingMaskIntoConstraints = false
+        wonLabel.topAnchor.constraint(equalTo: arView.topAnchor).isActive = true
+        wonLabel.bottomAnchor.constraint(equalTo: arView.bottomAnchor).isActive = true
+        wonLabel.leadingAnchor.constraint(equalTo: arView.leadingAnchor).isActive = true
+        wonLabel.trailingAnchor.constraint(equalTo: arView.trailingAnchor).isActive = true
+    }
+    
+    func setupLostLabel() {
+        lostLabel.backgroundColor = UIColor(red: 1, green: 0, blue: 0, alpha: 0.2)
+        lostLabel.text = "You Lost"
+        lostLabel.font = lostLabel.font.withSize(35)
+        lostLabel.textColor = .white
+        lostLabel.textAlignment = .center
+        lostLabel.isHidden = true
+        
+        arView.addSubview(lostLabel)
+        //the constraints have to be set after the subview is added to the view
+        setLostLabelConstraints()
+    }
+    
+    func setLostLabelConstraints() {
+        lostLabel.translatesAutoresizingMaskIntoConstraints = false
+        lostLabel.topAnchor.constraint(equalTo: arView.topAnchor).isActive = true
+        lostLabel.bottomAnchor.constraint(equalTo: arView.bottomAnchor).isActive = true
+        lostLabel.leadingAnchor.constraint(equalTo: arView.leadingAnchor).isActive = true
+        lostLabel.trailingAnchor.constraint(equalTo: arView.trailingAnchor).isActive = true
     }
     
     func setupRestartButtonButton() {
@@ -135,7 +183,7 @@ class GameBrain {
                     print("The user already has two cards selected and can therefore not reveal another card")
                     return
                 }
-                DispatchQueue.main.asyncAfter(deadline: .now() + Constants.flipDuration + 0.2, execute: self.checkSelection)
+                DispatchQueue.main.asyncAfter(deadline: .now() + Constants.flipDuration + 0.2, execute: self.checkAndRemoveSelection)
             }
             
             
@@ -143,7 +191,7 @@ class GameBrain {
     }
     
     @objc func restartGame() {
-        secondsUntilTimeout = 15
+        secondsUntilTimeout = Constants.timoutDuration
         selection1 = nil
         selection2 = nil
         arView.addGestureRecognizer(tapGestureRecognizer)
@@ -179,12 +227,14 @@ class GameBrain {
         
         DispatchQueue.main.async {
             self.restartButton.isHidden = true
+            self.wonLabel.isHidden = true
+            self.lostLabel.isHidden = true
             self.timerLabel.text = String(self.secondsUntilTimeout) + "s"
             self.timerLabel.isHidden = true
         }
     }
     
-    func checkSelection() {
+    func checkAndRemoveSelection() {
         if selection1?.card.kind == self.selection2?.card.kind {
             selection1?.isEnabled = false
             selection1 = nil
